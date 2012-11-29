@@ -38,3 +38,4 @@ void DrawCentralPoint ( Mat &dst, Point center)
 {
 	circle( dst, center , 10, Scalar(0,255,0), 5, 8, 0 );
 }
+

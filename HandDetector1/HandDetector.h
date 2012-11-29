@@ -13,7 +13,10 @@ class HandDetector
 //private:
 	Point center;
 	Mat mask, frame;
+	Scalar color;
 public:
 	void Calibration();
 	void Track();
+	void CamShiftTracking();
+	
 };

@@ -69,8 +69,6 @@ void OpticalFlow(Mat& src1, Mat& src2, vector<Point2f>& prevPoints, vector<Point
 
 
 
-
-
 void pickPoint (Mat &src, MatND &dst, Mat &mask, Point seed, int lo = 20, int up = 20)
 {
 	  Mat hsv;
@@ -81,8 +79,58 @@ void pickPoint (Mat &src, MatND &dst, Mat &mask, Point seed, int lo = 20, int up
 	  int flags = connectivity + (newMaskVal << 8 ) + FLOODFILL_FIXED_RANGE + FLOODFILL_MASK_ONLY;
 	  Mat mask2 = Mat::zeros( src.rows + 2, src.cols + 2, CV_8UC1 );
 	  floodFill( src, mask2, seed, newVal, 0, Scalar( lo, lo, lo ), Scalar( up, up, up), flags );
-	  // TODO: dalczego czasem rzuca tu wyj¹tek?	 
+	 
 	  mask = mask2( Range( 1, mask2.rows - 1 ), Range( 1, mask2.cols - 1 ) );
 
 }
 
+////apply FloodFill algorithm for chosen point
+//void pickPoint (Mat &src, MatND &dst, Mat &mask, Point seed, int lo = 20, int up = 20)
+//{
+//	  Mat hsv,mask1, mask3;
+//	  int vmin = 100, vmax = 230, smin = 30;
+//	 /* Scalar minColor = Scalar(color.val[0]-lo,color.val[1]-lo,color.val[2]-lo);
+//	  Scalar maxColor = Scalar(color.val[0]+up,color.val[1]+up,color.val[2]+up);
+//	  cvtColor( src, hsv, CV_BGR2HSV );
+//	  		inRange(hsv, Scalar(0, smin, vmin),
+//							Scalar(180, 256, vmax), mask1);*/
+//	  int newMaskVal = 255;
+//	  Scalar newVal = Scalar( 120, 120, 120 );
+//	  int connectivity = 8;
+//	  int flags = connectivity + (newMaskVal << 8 ) + FLOODFILL_FIXED_RANGE + FLOODFILL_MASK_ONLY;
+//	  Mat mask2 = Mat::zeros( src.rows + 2, src.cols + 2, CV_8UC1 );
+//	  //floodFill( src, mask, seed, newVal, 0, Scalar( lo, lo, lo ), Scalar( up, up, up), flags );	 
+//	  floodFill( src, mask2, seed, newVal, 0, Scalar( lo, lo, lo ), Scalar( up, up, up), flags );
+//	  // TODO: dalczego czasem rzuca tu wyj¹tek?	 
+//	  mask
+//		  = mask2( Range( 1, mask2.rows - 1 ), Range( 1, mask2.cols - 1 ) );
+//	//  bitwise_and(mask1,mask3,mask);
+//	 // imshow("mask3", mask3);
+//	  HistAndBackproj( hsv,mask,dst );
+//	  //imshow("backpr", dst);
+//}
+
+void HistAndBackproj(Mat &hsv, Mat &mask, MatND &dst )
+{
+  MatND hist;
+  int h_bins = 30; int s_bins = 32;
+  int histSize[] = { h_bins, s_bins };
+  float h_range[] = { 0, 179 };
+  float s_range[] = { 0, 255 };
+  const float* ranges[] = { h_range, s_range };
+  int channels[] = { 0, 1 };
+  /// Get the Histogram and normalize it
+  calcHist( &hsv, 1, channels, mask, hist, 2, histSize, ranges, true, false );
+  normalize( hist, hist, 0, 255, NORM_MINMAX, -1, Mat() );
+  calcBackProject( &hsv, 1, channels, hist, dst, ranges, 1, true );
+}
+
+void ConvertToHSV(Mat &src, Mat &dst)
+{
+	cvtColor(src, dst, CV_BGR2HSV);
+}
+
+void HistNormalize(Mat &hist)
+{
+normalize(hist, hist, 0, 255, CV_MINMAX);
+}

@@ -81,3 +81,62 @@ Point2f GetNearestPoint(vector<Point2f> &nextPoints) {
 }
 
 
+
+Point2f GetNearestPoint(vector<Point2f> &points, Point2f center) {
+	//Point2f average = GetAveragePoint(nextPoints);
+
+	const float maxDistance = 10000.0f;
+
+	vector<Point2f> closePoints;
+	for(int i=0;i<points.size();i++)
+		if (Distance2d(points[i], center) < maxDistance)
+			closePoints.push_back(points[i]);
+	Point2f averageFromGoodPoints = GetAveragePoint(closePoints);
+	
+	vector<float> mininumDistances;
+	for(int i=0;i<points.size();i++)
+		mininumDistances.push_back(Distance2d(points[i], averageFromGoodPoints));
+	
+	
+	int index=0;
+	int minValue = mininumDistances[0];
+	for(int i=1;i<points.size();i++)
+		if (mininumDistances[i] < minValue) {
+			minValue = mininumDistances[i];
+			index = i;
+		}
+
+	return points[index];
+
+}
+
+
+
+vector<Point2f> FindMaskPoints(Mat & mask)
+{
+	vector<Point2f> maskPoints;
+		for(int row=0;row<mask.rows;row++) {
+			const uchar *ptr = mask.data + row * mask.step;
+			for(int col=0;col < mask.cols;col++)
+				if (*ptr++ > 0)
+					maskPoints.push_back(Point2f(col,row));
+		}
+	return maskPoints;
+}
+
+bool VectorContains (vector<Point2f> points, Point2f point)
+{
+	for(int i = 0; i < points.size(); i++)
+		if(point.x == points[i].x && point.y == points[i].y)
+			return true;
+	return false;
+}
+
+Scalar GetColor (Mat &src,Point point)
+{
+	Scalar color;
+	Vec3b col =  src.at<Vec3b>(point);
+	color = Scalar(col.val[0],col.val[1], col.val[2]);
+	return color;
+
+}
